@@ -4,6 +4,7 @@
     var upArrow = '\u25b2';
 
     var settings = {
+
     };
 
     var color = function (c, n, i, d) { for (i = 3; i--; c[i] = d < 0 ? 0 : d > 255 ? 255 : d | 0) d = c[i] + n; return c }
@@ -24,6 +25,14 @@
         return result;
     };
 
+    var updateThStyle = function($el, sortDesc) {
+        $el.addClass('sort-me-col');
+        width = parseFloat($el.css('width').replace('px', ''));
+        $el.css('width', width + 14);
+        $el.html($el.html() + '<span class="sort-me-arrow" style="float:right" data-js-sortdesc="' + sortDesc + '">' + (sortDesc ? downArrow : upArrow) + '</span>');
+        changeBackgroundColor($el, -10);
+    };
+
     var sort = function (e) {
         var $el = $(e.currentTarget);
         var $parentTable = $el.closest('table');
@@ -32,7 +41,7 @@
         var sortDesc = true;
 
         if ($previous.length) {
-            $parentTable.find('tbody tr td.sort-me-val').toArray().forEach(function(td) {
+            $parentTable.find('tbody tr td.sort-me-val').toArray().forEach(function (td) {
                 var $td = $(td);
                 $td.removeClass('sort-me-val');
                 changeBackgroundColor($td, 10);
@@ -70,12 +79,8 @@
             return;
         }
 
-        $el.addClass('sort-me-col');
-        width = parseFloat($el.css('width').replace('px', ''));
-        $el.css('width', width + 14);
-        $el.html($el.html() + '<span class="sort-me-arrow" style="float:right" data-js-sortdesc="' + sortDesc + '">' + (sortDesc ? downArrow : upArrow) + '</span>');
-        changeBackgroundColor($el, -10);
-        
+        updateThStyle($el, sortDesc);
+
         if (isNumberType(values))
             values = values.map(function (val) { return parseFloat(val) });
 
@@ -109,6 +114,20 @@
     };
 
     var init = function (index, el) {
+        if (settings.serverSortedColumn) {
+            var $el = $(el).find(settings.serverSortedColumn);
+            if ($el.length) {
+                var ind = $el.index();
+                var $parentTable = $el.closest('table');
+                var tds = $parentTable.find('tbody tr td:nth-child(' + (ind + 1) + ')').toArray();
+                updateThStyle($el, !settings.serverSortedAsc);
+                tds.forEach(function (td) {
+                    var $td = $(td);
+                    $td.addClass('sort-me-val');
+                    changeBackgroundColor($td, -10);
+                });
+            }
+        }
         $(el).find('th').on('click', function (e) { sort(e); });
     }
 
