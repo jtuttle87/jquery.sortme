@@ -4,14 +4,23 @@
     var upArrow = '\u25b2';
 
     var settings = {
-
+        sortElementSelector: 'tbody tr'
     };
 
     var color = function (c, n, i, d) { for (i = 3; i--; c[i] = d < 0 ? 0 : d > 255 ? 255 : d | 0) d = c[i] + n; return c }
 
+    var cleanColor = function(color) {
+        return color.replace('r', '')
+                .replace('g', '')
+                .replace('b', '')
+                .replace('a', '')
+                .replace('(', '')
+                .replace(')', '');
+    };
+
     var changeBackgroundColor = function ($el, amount) {
         var c = $el.css('background-color');
-        c = eval('[' + c.substr(4, c.length - 5) + ']');
+        c = JSON.parse('[' + cleanColor(c) + ']');
         var newColor = color(c, amount);
         $el.css('background-color', 'rgb(' + newColor.toString() + ')');
     };
@@ -21,6 +30,22 @@
         values.forEach(function (val) {
             if (isNaN(parseFloat(val)))
                 result = false;
+        });
+        return result;
+    };
+
+    var isDateType = function (values) {
+        var result = true;
+        values.forEach(function (val) {
+            var d = new Date(val);
+            if (Object.prototype.toString.call(d) === "[object Date]") {
+                if (isNaN(d.getTime())) {
+                    result = false;
+                }
+            }
+            else {
+                result = false;
+            }
         });
         return result;
     };
@@ -63,7 +88,7 @@
 
 
         var ind = $el.index();
-        var tableRows = $parentTable.find('tbody tr').toArray();
+        var tableRows = $parentTable.find(settings.sortElementSelector).toArray();
         var invalidSort = false;
         var values = tableRows.map(function (tr) {
             var td = $(tr).find('td')[ind];
@@ -81,8 +106,12 @@
 
         updateThStyle($el, sortDesc);
 
-        if (isNumberType(values))
+
+        if (isDateType(values))
+            values = values.map(function (val) { return new Date(val) });
+        else if (isNumberType(values))
             values = values.map(function (val) { return parseFloat(val) });
+
 
         var i = 0;
         var rowVal = [];
@@ -101,12 +130,12 @@
             return 0;
         });
 
-        $parentTable.find('tbody tr').remove();
-        var $tbody = $parentTable.find('tbody');
+        $parentTable.find(settings.sortElementSelector).remove();
+        var $container = settings.sortElementSelector.indexOf('tbody') == -1 ? $parentTable.find('tbody') : $parentTable;
         rowVal.forEach(function (rv) {
-            $tbody.append(tableRows[rv.ind]);
+            $container.append(tableRows[rv.ind]);
         });
-        $tbody.find('tr td:nth-child(' + (ind + 1) + ')').toArray().forEach(function (td) {
+        $container.find('tr td:nth-child(' + (ind + 1) + ')').toArray().forEach(function (td) {
             var $td = $(td);
             $td.addClass('sort-me-val');
             changeBackgroundColor($td, -10);
@@ -128,7 +157,9 @@
                 });
             }
         }
-        $(el).find('th').on('click', function (e) { sort(e); });
+        $(el).find('th').on('click', function(e) {
+             sort(e);
+        });
     }
 
     $.fn.sortme = function (opts) {
