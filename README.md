@@ -39,6 +39,10 @@ If your date is pre-sorted server side, you can initialize the plugin with the f
     <td>serverSortedAsc</td>
     <td>(optional, defaults to false) The direction of the sort</td>
 </tr>
+<tr>
+    <td>sortElementSelector</td>
+    <td>(optional, defaults to 'tbody tr') The selector for the elements to sort</td>
+</tr>
 </tbody>
 </table>
 
