@@ -130,11 +130,21 @@
             return 0;
         });
 
-        $parentTable.find(settings.sortElementSelector).remove();
         var $container = settings.sortElementSelector.indexOf('tbody') == -1 ? $parentTable.find('tbody') : $parentTable;
-        rowVal.forEach(function (rv) {
-            $container.append(tableRows[rv.ind]);
-        });
+
+        if (settings.viewUpdater) {
+            var sortedTableRows = [];
+            rowVal.forEach(function (rv) {
+                sortedTableRows.push(tableRows[rv.ind]);
+            });
+            settings.viewUpdater(sortedTableRows);
+        } else {
+            $parentTable.find(settings.sortElementSelector).remove();
+            rowVal.forEach(function (rv) {
+                $container.append(tableRows[rv.ind]);
+            });
+        }
+
         $container.find('tr td:nth-child(' + (ind + 1) + ')').toArray().forEach(function (td) {
             var $td = $(td);
             $td.addClass('sort-me-val');
