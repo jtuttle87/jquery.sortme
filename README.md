@@ -43,6 +43,10 @@ If your date is pre-sorted server side, you can initialize the plugin with the f
     <td>sortElementSelector</td>
     <td>(optional, defaults to 'tbody tr') The selector for the elements to sort</td>
 </tr>
+<tr>
+    <td>viewUpdater</td>
+    <td>(optional, defaults to using build in remove/append logic) The function used to update the view</td>
+</tr>
 </tbody>
 </table>
 
